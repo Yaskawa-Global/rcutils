@@ -86,7 +86,11 @@ rcutils_load_shared_library(
   }
 
 #ifndef _WIN32
+#ifdef OLD_COMPILER_NO_SUPPORT
+  lib->lib_pointer = NULL;
+#else
   lib->lib_pointer = dlopen(lib->library_path, RTLD_LAZY);
+#endif
   if (!lib->lib_pointer) {
     RCUTILS_SET_ERROR_MSG_WITH_FORMAT_STRING("LoadLibrary error: %s", dlerror());
 #else
@@ -115,6 +119,7 @@ rcutils_get_symbol(const rcutils_shared_library_t * lib, const char * symbol_nam
   }
 
 #ifndef _WIN32
+#ifndef OLD_COMPILER_NO_SUPPORT
   void * lib_symbol = dlsym(lib->lib_pointer, symbol_name);
   char * error = dlerror();
   if (error != NULL) {
@@ -123,6 +128,9 @@ rcutils_get_symbol(const rcutils_shared_library_t * lib, const char * symbol_nam
       symbol_name, error);
     return NULL;
   }
+#else
+  void * lib_symbol = NULL;
+#endif
 #else
   void * lib_symbol = GetProcAddress((HINSTANCE)(lib->lib_pointer), symbol_name);
   if (lib_symbol == NULL) {
@@ -149,12 +157,16 @@ rcutils_has_symbol(const rcutils_shared_library_t * lib, const char * symbol_nam
   }
 
 #ifndef _WIN32
+#ifndef OLD_COMPILER_NO_SUPPORT
   // the correct way to test for an error is to call dlerror() to clear any old error conditions,
   // then call dlsym(), and then call dlerror() again, saving its return value into a variable,
   // and check whether this saved value is not NULL.
   dlerror(); /* Clear any existing error */
   void * lib_symbol = dlsym(lib->lib_pointer, symbol_name);
   return dlerror() == NULL && lib_symbol != 0;
+#else
+  return false;
+#endif
 #else
   void * lib_symbol = GetProcAddress((HINSTANCE)(lib->lib_pointer), symbol_name);
   return lib_symbol != NULL;
@@ -171,8 +183,13 @@ rcutils_unload_shared_library(rcutils_shared_library_t * lib)
 
   rcutils_ret_t ret = RCUTILS_RET_OK;
 #ifndef _WIN32
+#ifndef OLD_COMPILER_NO_SUPPORT
   // The function dlclose() returns 0 on success, and nonzero on error.
   int error_code = dlclose(lib->lib_pointer);
+#else
+  // just set it to non-zero
+  int error_code = 1234;
+#endif
   if (error_code) {
     RCUTILS_SET_ERROR_MSG_WITH_FORMAT_STRING("dlclose error: %s", dlerror());
 #else
