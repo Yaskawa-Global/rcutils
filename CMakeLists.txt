@@ -49,8 +49,10 @@ if(NOT WIN32)
 endif()
 
 if(WIN32)
+  message(STATUS "Win32 time.c")
   set(time_impl_c src/time_win32.c)
 else()
+  message(STATUS "Unix time.c")
   set(time_impl_c src/time_unix.c)
 endif()
 
