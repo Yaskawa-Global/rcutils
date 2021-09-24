@@ -108,7 +108,11 @@ extern "C"
 
 /// Macro to declare deprecation in the platform appropriate manner with a message.
 #ifndef _WIN32
+#ifndef OLD_COMPILER_NO_SUPPORT
 # define RCUTILS_DEPRECATED_WITH_MSG(msg) __attribute__((deprecated(msg)))
+#else
+# define RCUTILS_DEPRECATED_WITH_MSG(msg) __attribute__((deprecated))
+#endif // OLD_COMPILER_NO_SUPPORT
 #else
 # define RCUTILS_DEPRECATED_WITH_MSG(msg) __declspec(deprecated(msg))
 #endif
