@@ -118,7 +118,11 @@ extern "C"
 
 /// Macro to declare deprecation in the platform appropriate manner with a message.
 #ifndef _WIN32
+#ifndef YASKAWA_MOTOMAN_MOTOPLUS1_GCC43
 # define RCUTILS_DEPRECATED_WITH_MSG(msg) __attribute__((deprecated(msg)))
+#else
+# define RCUTILS_DEPRECATED_WITH_MSG(msg) __attribute__((deprecated))
+#endif // YASKAWA_MOTOMAN_MOTOPLUS1_GCC43
 #else
 # define RCUTILS_DEPRECATED_WITH_MSG(msg) __declspec(deprecated(msg))
 #endif
