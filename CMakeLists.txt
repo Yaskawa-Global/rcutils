@@ -39,7 +39,7 @@ if(NOT WIN32)
   # implicit sign conversions in gtest.cc, see https://ci.ros2.org/job/ci_osx/9381/clang/.
   # Hence disabling -Wsign-conversion for now until all those have eventually been fixed.
   # (from https://github.com/ros2/rcutils/pull/263#issuecomment-663252537)
-  add_compile_options(-Wall -Wextra -Wconversion -Wno-sign-conversion -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wconversion -Wno-sign-conversion -pedantic)
 endif()
 
 if(WIN32)
