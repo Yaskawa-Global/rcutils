@@ -234,6 +234,11 @@ rcutils_to_native_path(
 bool
 rcutils_mkdir(const char * abs_path)
 {
+#ifdef RCUTILS_NO_FILESYSTEM
+  RCUTILS_SET_ERROR_MSG("not available filesystem");
+  return false;
+#else
+
   if (NULL == abs_path) {
     return false;
   }
@@ -261,6 +266,7 @@ rcutils_mkdir(const char * abs_path)
   }
 
   return success;
+#endif  // _RCUTILS_NO_FILESYSTEM
 }
 
 size_t
