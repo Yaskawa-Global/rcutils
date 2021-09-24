@@ -27,6 +27,13 @@ rcutils_strerror(char * buffer, size_t buffer_length)
 {
 #if defined(_WIN32)
   strerror_s(buffer, buffer_length, errno);
+#elif defined(OLD_COMPILER_NO_SUPPORT)
+  // TODO: Fix. Old compiler strerror_r(..) does not take buffer_length
+  int error_status = strerror_r(errno, buffer);
+  if (error_status != 0) {
+    strncpy(buffer, "Failed to get error", buffer_length);
+    buffer[buffer_length - 1] = '\0';
+  }
 #elif defined(_GNU_SOURCE) && (!defined(ANDROID) || __ANDROID_API__ >= 23)
   /* GNU-specific */
   char * msg = strerror_r(errno, buffer, buffer_length);
