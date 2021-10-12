@@ -59,7 +59,9 @@ extern "C"
 #endif  // _WIN32
 
 #ifdef RCUTILS_NO_FILESYSTEM
+#ifndef YASKAWA_MOTOMAN_MOTOPLUS1 // TODO: we're using this as a platform ifdef
 typedef int DIR;
+#endif // _YASKAWA_MOTOMAN_MOTOPLUS1
 #endif  // _RCUTILS_NO_FILESYSTEM
 typedef struct rcutils_dir_iter_state_t
 {
