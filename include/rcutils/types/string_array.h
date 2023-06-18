@@ -199,7 +199,8 @@ rcutils_string_array_sort_compare(const void * lhs, const void * rhs);
  * \return #RCUTILS_RET_INVALID_ARGUMENT for invalid arguments, or
  * \return #RCUTILS_RET_ERROR if an unknown error occurs.
  */
-inline
+// https://stackoverflow.com/questions/3100429
+static inline
 RCUTILS_WARN_UNUSED
 rcutils_ret_t
 rcutils_string_array_sort(rcutils_string_array_t * string_array)
