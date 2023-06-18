@@ -39,15 +39,15 @@ static bool * get_memory_lock(void *address)
 }
 
 void lock_memory(uint64_t *address){
-  bool * memory_lock = get_memory_lock(address);
+  uint32_t * memory_lock = get_memory_lock(address);
 
-  while (__atomic_test_and_set(memory_lock, __ATOMIC_ACQUIRE) == 1);
+  while (__sync_lock_test_and_set(memory_lock, 1) == 1);
 }
 
 void unlock_memory(uint64_t *address){
-  bool * memory_lock = get_memory_lock(address);
+  uint32_t * memory_lock = get_memory_lock(address);
 
-  __atomic_clear(memory_lock, __ATOMIC_RELEASE);
+  __sync_lock_test_and_set(memory_lock, 0);
 }
 
 uint64_t __atomic_load_8(uint64_t *mem, int model) { 
@@ -67,7 +67,8 @@ void __atomic_store_8(uint64_t *mem, uint64_t val, int model) {
   unlock_memory(mem); 
 }
 
-uint64_t __atomic_exchange_8(uint64_t *mem, uint64_t val, int model) { 
+// uint64_t __atomic_exchange_8(uint64_t *mem, uint64_t val, int model) {
+uint64_t __sync_lock_test_and_set_8(uint64_t *mem, uint64_t val, int model) {
   (void) model;
 
   lock_memory(mem); 
@@ -77,7 +78,8 @@ uint64_t __atomic_exchange_8(uint64_t *mem, uint64_t val, int model) {
   return ret; 
 }
 
-uint64_t __atomic_fetch_add_8(uint64_t *mem, uint64_t val, int model) { 
+//uint64_t __atomic_fetch_add_8(uint64_t *mem, uint64_t val, int model) {
+uint64_t __sync_fetch_and_add_8(uint64_t *mem, uint64_t val, int model) {
   (void) model;
 
   lock_memory(mem); 
