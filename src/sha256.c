@@ -17,12 +17,12 @@
 
 #include "rcutils/sha256.h"
 
-static inline size_t min(size_t a, size_t b)
+static inline size_t __min(size_t a, size_t b)
 {
   return a < b ? a : b;
 }
 
-static inline size_t max(size_t a, size_t b)
+static inline size_t __max(size_t a, size_t b)
 {
   return a > b ? a : b;
 }
@@ -140,7 +140,7 @@ void rcutils_sha256_update(rcutils_sha256_ctx_t * ctx, const uint8_t * data, siz
   while (i < len) {
     data_remaining = len - i;
     block_remaining = 64 - ctx->datalen;
-    copy_len = min(min(block_remaining, data_remaining), 64);
+    copy_len = __min(__min(block_remaining, data_remaining), 64);
 
     memcpy(ctx->data + ctx->datalen, data + i, copy_len);
     ctx->datalen += copy_len;
