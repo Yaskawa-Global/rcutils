@@ -22,6 +22,37 @@ extern "C"
 
 #define FLAGS_LEN	23
 
+#if defined(YASKAWA_MOTOMAN_MOTOPLUS1_GCC43) && defined(FS100)
+static uint32_t * get_memory_lock(void *address)
+{
+  static uint32_t memory_locks[FLAGS_LEN] = { 0 };
+  uintptr_t a = (uintptr_t)(address);
+
+  // Public domain hash function taken from http://burtleburtle.net/bob/hash/integer.html
+  a = (a ^ 61) ^ (a >> 16);
+  a = a + (a << 3);
+  a = a ^ (a >> 4);
+  a = a * 0x27d4eb2d;
+  a = a ^ (a >> 15);
+
+  a = a % FLAGS_LEN;
+  return memory_locks + a;
+}
+
+void lock_memory(uint64_t *address){
+  uint32_t * memory_lock = get_memory_lock(address);
+
+  while (__sync_lock_test_and_set(memory_lock, 1));
+}
+
+void unlock_memory(uint64_t *address){
+  uint32_t * memory_lock = get_memory_lock(address);
+
+  __sync_lock_test_and_set(memory_lock, 0);
+}
+
+#else
+
 static bool * get_memory_lock(void *address)
 {
   static bool memory_locks[FLAGS_LEN] = { 0 };
@@ -49,6 +80,7 @@ void unlock_memory(uint64_t *address){
 
   __atomic_clear(memory_lock, __ATOMIC_RELEASE);
 }
+#endif
 
 uint64_t __atomic_load_8(uint64_t *mem, int model) { 
   (void) model;
@@ -86,6 +118,15 @@ uint64_t __atomic_fetch_add_8(uint64_t *mem, uint64_t val, int model) {
   unlock_memory(mem); 
   return ret; 
 }
+
+#if defined(YASKAWA_MOTOMAN_MOTOPLUS1_GCC43) && defined(FS100)
+uint64_t __sync_lock_test_and_set_8(uint64_t *mem, uint64_t val) {
+  return __atomic_exchange_8(mem, val, /*unused*/0);
+}
+uint64_t __sync_fetch_and_add_8(uint64_t *mem, uint64_t val) {
+  return __atomic_fetch_add_8(mem, val, /*unused*/0);
+}
+#endif
 
 #ifdef __cplusplus
 }
